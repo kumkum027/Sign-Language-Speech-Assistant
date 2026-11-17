@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F6F7F4;
+  --foreground: #172521;
+  --surface: #FFFFFF;
+  --muted: #68746F;
+  --accent: #176B60;
+  --accent-hover: #12544B;
+  --secondary: #B7D9CF;
+  --highlight: #D9EDDF;
+  --border: #E1E7E2;
+  --dark-surface: #142B29;
+  --success: #23865B;
+  --warning: #D99A37;
+}
+
+/* High Contrast & Night Mode for low vision, photophobia and dark environments */
+.high-contrast,
+.dark {
+  --background: #0A100F;
+  --foreground: #FFFFFF;
+  --surface: #111C19;
+  --muted: #A9B8B3;
+  --accent: #2FE4BD;
+  --accent-hover: #3FF5CE;
+  --secondary: #1F423B;
+  --highlight: #1B3530;
+  --border: #2A453E;
+  --dark-surface: #060B0A;
+  --success: #2FE4BD;
+  --warning: #F5A623;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Base form controls readability */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+textarea,
+select {
+  color: #172521;
+}
+
+/* Form and container theme adjustments */
+.high-contrast .bg-white,
+.dark .bg-white {
+  background-color: var(--surface) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.high-contrast aside,
+.dark aside {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.high-contrast header,
+.dark header {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.high-contrast .shadow-tactile,
+.dark .shadow-tactile,
+.high-contrast .shadow-float,
+.dark .shadow-float {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6) !important;
+}
+
+.high-contrast input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.high-contrast textarea,
+.high-contrast select,
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.dark textarea,
+.dark select {
+  color: #FFFFFF !important;
+  background-color: #162622 !important;
+  border-color: var(--border) !important;
+}
+
+.high-contrast input::placeholder,
+.high-contrast textarea::placeholder,
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* Strict Accessibility: Clear, non-intrusive focus rings */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Accessible captions smooth transitions */
+.caption-stream {
+  scroll-behavior: smooth;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,108 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+  ADMIN
+}
+
+enum LectureStatus {
+  SCHEDULED
+  LIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum TranscriptSource {
+  SPEECH
+  SIGN_LANGUAGE
+  MANUAL_CORRECTION
+}
+
+model User {
+  id              String            @id @default(cuid())
+  name            String
+  email           String            @unique
+  passwordHash    String
+  role            Role              @default(STUDENT)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  taughtClassrooms Classroom[]      @relation("TeacherClassrooms")
+  enrolledClasses  ClassroomMember[]
+  transcripts      Transcript[]     @relation("SpeakerTranscripts")
+
+  @@index([email])
+}
+
+model Classroom {
+  id          String            @id @default(cuid())
+  name        String
+  subject     String
+  description String?
+  code        String            @unique
+  teacherId   String
+  teacher     User              @relation("TeacherClassrooms", fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  members     ClassroomMember[]
+  lectures    Lecture[]
+
+  @@index([code])
+  @@index([teacherId])
+}
+
+model ClassroomMember {
+  id          String     @id @default(cuid())
+  userId      String
+  classroomId String
+  joinedAt    DateTime   @default(now())
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom   Classroom  @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classroomId])
+  @@index([userId])
+  @@index([classroomId])
+}
+
+model Lecture {
+  id          String        @id @default(cuid())
+  title       String
+  classroomId String
+  classroom   Classroom     @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  status      LectureStatus @default(SCHEDULED)
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  transcripts Transcript[]
+
+  @@index([classroomId])
+  @@index([status])
+}
+
+model Transcript {
+  id         String           @id @default(cuid())
+  lectureId  String
+  lecture    Lecture          @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  userId     String?
+  speaker    User?            @relation("SpeakerTranscripts", fields: [userId], references: [id], onDelete: SetNull)
+  text       String           @db.Text
+  source     TranscriptSource @default(SPEECH)
+  confidence Float            @default(1.0)
+  timestamp  DateTime         @default(now())
+
+  @@index([lectureId])
+  @@index([timestamp])
+  @@index([source])
+}

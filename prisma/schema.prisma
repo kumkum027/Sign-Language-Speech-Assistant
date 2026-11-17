@@ -1,0 +1,89 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id              String            @id @default(cuid())
+  name            String
+  email           String            @unique
+  passwordHash    String
+  role            String            @default("STUDENT") // "TEACHER" | "STUDENT" | "ADMIN"
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  taughtClassrooms Classroom[]      @relation("TeacherClassrooms")
+  enrolledClasses  ClassroomMember[]
+  transcripts      Transcript[]     @relation("SpeakerTranscripts")
+
+  @@index([email])
+}
+
+model Classroom {
+  id          String            @id @default(cuid())
+  name        String
+  subject     String
+  description String?
+  code        String            @unique // Unique 6-8 char code (e.g. AURA-782)
+  teacherId   String
+  teacher     User              @relation("TeacherClassrooms", fields: [teacherId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  members     ClassroomMember[]
+  lectures    Lecture[]
+
+  @@index([code])
+  @@index([teacherId])
+}
+
+model ClassroomMember {
+  id          String     @id @default(cuid())
+  userId      String
+  classroomId String
+  joinedAt    DateTime   @default(now())
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classroom   Classroom  @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, classroomId])
+  @@index([userId])
+  @@index([classroomId])
+}
+
+model Lecture {
+  id          String        @id @default(cuid())
+  title       String
+  classroomId String
+  classroom   Classroom     @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  status      String        @default("SCHEDULED") // "SCHEDULED" | "LIVE" | "COMPLETED" | "CANCELLED"
+  startedAt   DateTime?
+  endedAt     DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  transcripts Transcript[]
+
+  @@index([classroomId])
+  @@index([status])
+}
+
+model Transcript {
+  id         String   @id @default(cuid())
+  lectureId  String
+  lecture    Lecture  @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+  userId     String?
+  speaker    User?    @relation("SpeakerTranscripts", fields: [userId], references: [id], onDelete: SetNull)
+  text       String
+  source     String   @default("SPEECH") // "SPEECH" | "SIGN_LANGUAGE" | "MANUAL_CORRECTION"
+  confidence Float    @default(1.0)
+  timestamp  DateTime @default(now())
+
+  @@index([lectureId])
+  @@index([timestamp])
+  @@index([source])
+}
